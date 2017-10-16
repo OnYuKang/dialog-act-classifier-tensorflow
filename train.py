@@ -54,7 +54,7 @@ tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on 
 
 # Training parameters
 tf.flags.DEFINE_integer("num_epochs", 150, "Number of training epochs (default: 150)")
-tf.flags.DEFINE_integer("evaluate_every", 23355, "Evaluate model on dev set after this many steps (default: 23355, this step number is 1 epoch)")
+tf.flags.DEFINE_integer("evaluate_every", 233550, "Evaluate model on dev set after this many steps (default: 233550, this step number is 10 epoch)")
 tf.flags.DEFINE_integer("checkpoint_every", 233550, "Save model after this many steps (default: 233550, this step number is 10 epoch)")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
 tf.flags.DEFINE_integer("num_classes",23,"Number of output act classes (default:23)")
