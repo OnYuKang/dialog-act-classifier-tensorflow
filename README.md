@@ -1,4 +1,4 @@
-# Act-Classification-with-CNN
+# Dialog Act Classifier in Tensorflow
 
 Tensorflow implementation of "Sequential Short-Text Classification with Recurrent and Convolutional Neural Networks"
 
