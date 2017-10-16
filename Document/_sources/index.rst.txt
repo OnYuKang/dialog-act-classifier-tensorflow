@@ -1,0 +1,27 @@
+.. Act-Classification-with-CNN documentation master file, created by
+   sphinx-quickstart on Sun Sep 24 14:16:02 2017.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+Welcome to Act-Classification-with-CNN's documentation!
+=======================================================
+
+.. toctree::
+   :maxdepth: 4
+   :caption: Contents:
+
+   data_generator
+   DataHelper
+   model
+   train
+   eval
+   utils
+   
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

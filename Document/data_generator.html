@@ -1,0 +1,227 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>data_generator module &#8212; Act-Classification-with-CNN  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="DataHelper module" href="DataHelper.html" />
+    <link rel="prev" title="Welcome to Act-Classification-with-CNN’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-data_generator">
+<span id="data-generator-module"></span><h1>data_generator module<a class="headerlink" href="#module-data_generator" title="Permalink to this headline">¶</a></h1>
+<p>Act_classification-with-CNN/data_generator.py</p>
+<div class="line-block">
+<div class="line">This file makes DSTC2(Dialog State Tracking Challenge 2) json file to csv file.</div>
+<div class="line">DSTC2 dataset consist of call, each one in its own directory.</div>
+<div class="line">Each call has ‘log.json’ file and ‘label.json’ file.</div>
+</div>
+<ul class="simple">
+<li>‘log.json’ file, a Log Object which annotates the system’s output</li>
+<li>‘label.json’ file, a Label Object which annotates the user’s true utterance and action.</li>
+</ul>
+<div class="line-block">
+<div class="line">The formats of these objects are fully specified in DSTC2&amp;3 handbook 15p ~ 18p (Appendix A JSON Data Format)</div>
+<div class="line">Dialog State Tracking Challenge 2 &amp; 3 handbook (<a class="reference external" href="http://camdial.org/~mh521/dstc/downloads/handbook.pdf">http://camdial.org/~mh521/dstc/downloads/handbook.pdf</a>)</div>
+</div>
+<dl class="class">
+<dt id="data_generator.Call">
+<em class="property">class </em><code class="descclassname">data_generator.</code><code class="descname">Call</code><span class="sig-paren">(</span><em>log_filename</em>, <em>label_filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_generator.html#Call"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_generator.Call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>The DSTC2 dataset contains the system’s call information in log.json and the user’s call information in the label.json file. Therefore this class receives log file name and label file name and then accesses turns (a list of log-turn objects / a list of label-turn objects) in each file to combine information about each call.</p>
+<p>A list of log-turns, which gives the output of the system
+A list of label-turn object runs in parallel to the log-turn object and provides annotations of user’s output on the turn level.</p>
+<p>The detailed format for Log object and Label object is described in DSTC2&amp;3 handbook 15p ~ 18p (Appendix A JSON Data Format)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>log_filename</strong> (<em>str</em>) – A name of file containing log file</li>
+<li><strong>label_filename</strong> (<em>str</em>) – A name of file containing label file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns dict:</th><td class="field-body"><p class="first last">Dictinary type dataset contained each call information</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="data_generator.dataset_walker">
+<em class="property">class </em><code class="descclassname">data_generator.</code><code class="descname">dataset_walker</code><span class="sig-paren">(</span><em>dataset</em>, <em>label=False</em>, <em>dataroot=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_generator.html#dataset_walker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_generator.dataset_walker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Access the file list(<a href="#id1"><span class="problematic" id="id2">*</span></a>.flist) in the config directory to get the file of train, dev, test dataset.
+| Pass the log file name and label file name to the call class</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dataset</strong> (<em>list</em>) – A list of dataset name.</li>
+<li><strong>label</strong> (<em>bool</em>) – Boolean value for the existence of label file. The default value is False.</li>
+<li><strong>dataroot</strong> (<em>str</em>) – A name of directory where data exists. The default value is None.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns call:</th><td class="field-body"><p class="first last">Dictinary type dataset contained each call information</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="data_generator.make_act_csv">
+<code class="descclassname">data_generator.</code><code class="descname">make_act_csv</code><span class="sig-paren">(</span><em>file_name</em>, <em>file_dir</em>, <em>postfix='.csv'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_generator.html#make_act_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_generator.make_act_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>DSTC2 does not provide a file for the whole dialog act.
+| Therefore this function creates a csv file for the DSTC2 whole dialog acts.
+| Note thatif you use other data (not DSTC2), you can use it directly in the model if you make acts to csv file format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>file_name</strong> (<em>str</em>) – A name of file to save</li>
+<li><strong>file_dir</strong> (<em>str</em>) – A name of directory in which to save the file</li>
+<li><strong>postfix</strong> (<em>str</em>) – The extension name of the file to be saved. The default value is “.csv”.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="figure align-center" id="id3">
+<img alt="act_csv_example.jpg" src="act_csv_example.jpg" />
+<p class="caption"><span class="caption-text">This is simplified act.csv as Excel. The first line indicates column’s name and the others are member of that column.</span></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="data_generator.make_csv">
+<code class="descclassname">data_generator.</code><code class="descname">make_csv</code><span class="sig-paren">(</span><em>dataset</em>, <em>file_name</em>, <em>file_dir</em>, <em>postfix='.csv'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/data_generator.html#make_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#data_generator.make_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>It receives a dataset that combines log file and label file through dataset_walker.
+| This function extracts the necessary information from the dataset and transforms that into csv file format. The necessary information is call_index, trun_index, sentence, and annotated dialog-act.</p>
+<p>Note that the key names of the dictionary in which the user and system call information are stored are different. The format of the detailed dictionary is specified in DSTC2&amp;3 handbook 15p ~ 18p (Appendix A JSON Data Format)</p>
+<p>In the current code, save it in the existing “csvs” folder. Otherwise, create the “csvs” folder and save the data in that folder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>dataset</strong> (<em>dict</em>) – Dictionary type dataset containing information about call</li>
+<li><strong>file_name</strong> (<em>str</em>) – A name of file to save</li>
+<li><strong>file_dir</strong> (<em>str</em>) – A name of directory in which to save the file</li>
+<li><strong>postfix</strong> (<em>str</em>) – An extension name of the file to be saved. The default value is “.csv”.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="figure align-center" id="id4">
+<img alt="train_csv_example.jpg" src="train_csv_example.jpg" />
+<p class="caption"><span class="caption-text">This shows the train.csv file created with this function as Excel.The first line indicates each column’s name and the others are member of each column.</span></p>
+</div>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Act-Classification-with-CNN</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">data_generator module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DataHelper.html">DataHelper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="train.html">train module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eval.html">eval module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Welcome to Act-Classification-with-CNN’s documentation!</a></li>
+      <li>Next: <a href="DataHelper.html" title="next chapter">DataHelper module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/data_generator.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

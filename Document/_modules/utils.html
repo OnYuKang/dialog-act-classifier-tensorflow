@@ -1,0 +1,281 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>utils &#8212; Act-Classification-with-CNN  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for utils</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Act_classification-with-CNN/utils.py</span>
+
+<span class="sd">    This file contains some useful functions for other files.</span>
+<span class="sd">    </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">ast</span>
+
+<div class="viewcode-block" id="get_abs_path"><a class="viewcode-back" href="../utils.html#utils.get_abs_path">[docs]</a><span class="k">def</span> <span class="nf">get_abs_path</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns the absolute path of the file name</span>
+<span class="sd">    </span>
+<span class="sd">    :param str file_dir: Directory containing files</span>
+<span class="sd">    :param str file_name: The name of the file.</span>
+<span class="sd">    </span>
+<span class="sd">    :return str abs_path: The absolute path of the file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">abs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">file_dir</span><span class="p">),</span> <span class="n">file_name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">abs_path</span></div>
+
+<div class="viewcode-block" id="preprocess"><a class="viewcode-back" href="../utils.html#utils.preprocess">[docs]</a><span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    When creating a csv file from json files in a data_generator.py file, this function is used to preprocess the string.</span>
+<span class="sd">    </span>
+<span class="sd">    | It makes all the words in the sentence lower case and replace sentence symbols to space. </span>
+<span class="sd">    Then it replaces miss spelled words into correct words due to speech recognition errors and erases the proper nouns that are not found in word embedding among the words appearing in the dialogue. After that, it returns a copy of the string in which all chars have been stripped from the beginning and the end of the string.</span>
+<span class="sd">    </span>
+<span class="sd">    :param str string: Raw string</span>
+<span class="sd">    :return str string: Preprocessed string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">exception_words</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="sa">r</span><span class="s2">&quot;\btaquita\b&quot;</span><span class="p">:</span> <span class="s2">&quot;taquitos&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bexpen\b&quot;</span><span class="p">:</span> <span class="s2">&quot;expensive&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bmeditteranian\b&quot;</span><span class="p">:</span> <span class="s2">&quot;mediterranean&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bdeosnt\b&quot;</span><span class="p">:</span> <span class="s2">&quot;does not&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bbaskey\b&quot;</span><span class="p">:</span> <span class="s2">&quot;basket&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bdontcare\b&quot;</span><span class="p">:</span> <span class="s2">&quot;dont care&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bexpl\b&quot;</span><span class="p">:</span> <span class="s2">&quot;explicit&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\baddr\b&quot;</span><span class="p">:</span> <span class="s2">&quot;address&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bconf\b&quot;</span><span class="p">:</span> <span class="s2">&quot;confirm&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bnandos\b&quot;</span><span class="p">:</span> <span class="s2">&quot;nando s&quot;</span><span class="p">,</span> <span class="c1"># careful</span>
+        <span class="sa">r</span><span class="s2">&quot;\bopean\b&quot;</span><span class="p">:</span> <span class="s2">&quot;european&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bexpe\b&quot;</span><span class="p">:</span> <span class="s2">&quot;expensive&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bseouls\b&quot;</span><span class="p">:</span> <span class="s2">&quot;seoul s&quot;</span><span class="p">,</span> <span class="c1"># careful</span>
+        <span class="sa">r</span><span class="s2">&quot;\bunitelligible\b&quot;</span><span class="p">:</span> <span class="s2">&quot;unintelligible&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bnosie\b&quot;</span><span class="p">:</span> <span class="s2">&quot;noise&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bgoodb\b&quot;</span><span class="p">:</span> <span class="s2">&quot;goodbye&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bscandin\b&quot;</span><span class="p">:</span> <span class="s2">&quot;scandinavian&quot;</span><span class="p">,</span>
+        
+        <span class="sa">r</span><span class="s2">&quot;\bkymmoy\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bbennys\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\beraina\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\balimentum\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bpanahar\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bfitzbillies\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bdarrys\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bcocum\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bzizzi\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bpanasian\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bpipasha\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="sa">r</span><span class="s2">&quot;\bLensfield\b&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+
+    <span class="p">}</span>
+    
+    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[^a-z?]&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">fr</span><span class="p">,</span> <span class="n">to</span> <span class="ow">in</span> <span class="n">exception_words</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">to</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\s+&quot;</span><span class="p">,</span> <span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">string</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">string</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="load_data"><a class="viewcode-back" href="../utils.html#utils.load_data">[docs]</a><span class="k">def</span> <span class="nf">load_data</span><span class="p">(</span><span class="n">file_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function loads csv file as pandas.dataframe in train.py and eval.py.</span>
+<span class="sd">    </span>
+<span class="sd">    :param str file_name: File name to load</span>
+<span class="sd">    :return dataframe df: Whole dataset as dataframe type</span>
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">       :linenos:</span>
+<span class="sd">       </span>
+<span class="sd">       df = load_data(&#39;./csvs/train.csv&#39;)</span>
+<span class="sd">    </span>
+<span class="sd">    .. figure:: load_data_example.jpg</span>
+<span class="sd">       :scale: 30%</span>
+<span class="sd">       :align: center</span>
+<span class="sd">       </span>
+<span class="sd">       This example is train.csv file loaded into pandas.DataFrame.</span>
+<span class="sd">       </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;file </span><span class="si">%s</span><span class="s2"> is of invalid file format&quot;</span> <span class="o">%</span> <span class="n">file_path</span><span class="p">)</span>
+    
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="convert_act_to_vector"><a class="viewcode-back" href="../utils.html#utils.convert_act_to_vector">[docs]</a><span class="k">def</span> <span class="nf">convert_act_to_vector</span><span class="p">(</span><span class="n">df</span><span class="p">,</span><span class="n">act_data_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts pandas act dataframe to one-hot vector in train.py and eval.py</span>
+<span class="sd">    </span>
+<span class="sd">    :param pandas.dataframe: Act dataframe </span>
+<span class="sd">    :param str act_data_file: Act csv file </span>
+<span class="sd">    :return list labels: Converted one-hot vectors from act as string type </span>
+<span class="sd">    </span>
+<span class="sd">    .. code-block:: python</span>
+<span class="sd">       :linenos:</span>
+<span class="sd"> </span>
+<span class="sd">        data = pd.read_csv(&#39;./csvs/train.csv&#39;)</span>
+<span class="sd">        data[&#39;act&#39;] = convert_act_to_vector(data[&#39;act&#39;],&#39;./csvs/act.csv&#39;)</span>
+<span class="sd">        </span>
+<span class="sd">    .. figure:: convert_act_to_vector_example.jpg</span>
+<span class="sd">       :scale: 30%</span>
+<span class="sd">       :align: center</span>
+<span class="sd">      </span>
+<span class="sd">       This example is some acts label to one hot vector label.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#act list from dataset</span>
+    <span class="n">actlist</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    
+    <span class="c1">#load act csv file and make it list type</span>
+    <span class="n">act_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">act_data_file</span><span class="p">)</span>
+    <span class="n">act_df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">act_file_path</span><span class="p">)</span>
+    <span class="n">standardact</span><span class="o">=</span><span class="n">act_df</span><span class="p">[</span><span class="s1">&#39;act&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    
+    <span class="c1">#make one-hot label</span>
+    <span class="n">labels</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">acts</span> <span class="ow">in</span> <span class="n">actlist</span><span class="p">:</span>
+        <span class="n">label</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">standardact</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">acts</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">acts</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">acts</span><span class="p">)):</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">standardact</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">acts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">label</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">=</span><span class="mf">1.0</span>
+        <span class="n">label</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">labels</span></div>
+
+<div class="viewcode-block" id="convert_vector_to_act"><a class="viewcode-back" href="../utils.html#utils.convert_vector_to_act">[docs]</a><span class="k">def</span> <span class="nf">convert_vector_to_act</span><span class="p">(</span><span class="n">act_array</span><span class="p">,</span><span class="n">act_data_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function convert one-hot vector to act as string type</span>
+<span class="sd">    </span>
+<span class="sd">    :param numpy.array: one-hot vectors as numpy array type</span>
+<span class="sd">    :param str act_data_file: Act csv file</span>
+<span class="sd">    :returns list whole_act_list: converted acts list as string type from one-hot vectors</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1">#load act csv file and make it list type</span>
+    <span class="n">act_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">act_data_file</span><span class="p">)</span>
+    <span class="n">act_df</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">act_file_path</span><span class="p">)</span>
+    <span class="n">standard_act</span><span class="o">=</span><span class="n">act_df</span><span class="p">[</span><span class="s1">&#39;act&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    
+    <span class="n">whole_act_list</span><span class="o">=</span><span class="p">[]</span>
+    <span class="c1"># convert one-hot vector to act as string type</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">act_array</span><span class="p">)):</span>
+        <span class="n">act_list</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">act_array</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                       <span class="k">if</span> <span class="n">act_array</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                          <span class="n">act_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">standard_act</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+        <span class="n">whole_act_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">act_list</span><span class="p">)</span>
+                       
+    <span class="k">return</span> <span class="n">whole_act_list</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Act-Classification-with-CNN</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../data_generator.html">data_generator module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DataHelper.html">DataHelper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">model module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../train.html">train module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../eval.html">eval module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">utils module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

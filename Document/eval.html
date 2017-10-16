@@ -1,0 +1,142 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>eval module &#8212; Act-Classification-with-CNN  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="utils module" href="utils.html" />
+    <link rel="prev" title="train module" href="train.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-eval">
+<span id="eval-module"></span><h1>eval module<a class="headerlink" href="#module-eval" title="Permalink to this headline">¶</a></h1>
+<p>Act_classification-with-CNN/eval.py</p>
+<div class="line-block">
+<div class="line">Evaluate the trained model.</div>
+</div>
+<ul class="simple">
+<li>Defines parameters for model restoring and model testing.</li>
+<li>Loads test dataset and preprocess and restores trained model</li>
+<li>After comparing the prediction of the trained model and the desired output, it measures the accuracy of exactly the same for all classes.</li>
+<li>For each act, it calculates recall, precision. f1 score and stores these at ‘./checkpoint_dir/../act_accuracy.csv’</li>
+</ul>
+<blockquote>
+<div><div class="figure align-center" id="id1">
+<img alt="act_accuracy.jpg" src="act_accuracy.jpg" />
+<p class="caption"><span class="caption-text">This is brief example of act_accuracy.csv</span></p>
+</div>
+</div></blockquote>
+<ul class="simple">
+<li>To check prediction result, this file makes human readable format file at ‘./checkpoint_dir/../prediction.csv’</li>
+</ul>
+<blockquote>
+<div><div class="figure align-center" id="id2">
+<img alt="prediction.jpg" src="prediction.jpg" />
+<p class="caption"><span class="caption-text">This is brief example of prediction.csv</span></p>
+<div class="legend">
+<div class="line-block">
+<div class="line">If you want to see the wrong sample, you can set the answer column to the filter column and see a sample of zero labels.</div>
+</div>
+</div>
+</div>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Act-Classification-with-CNN</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data_generator.html">data_generator module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DataHelper.html">DataHelper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="train.html">train module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">eval module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="train.html" title="previous chapter">train module</a></li>
+      <li>Next: <a href="utils.html" title="next chapter">utils module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/eval.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

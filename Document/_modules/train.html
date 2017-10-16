@@ -1,0 +1,415 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>train &#8212; Act-Classification-with-CNN  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for train</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Act_classification-with-CNN/train.py</span>
+
+<span class="sd">    This file trains the Tensorflow model. </span>
+<span class="sd">   </span>
+<span class="sd">    In this file, </span>
+<span class="sd">    </span>
+<span class="sd">    * Defines parameters for model initialization and training.</span>
+<span class="sd">    * Loads dataset for training/validation and preprocess the dataset.</span>
+<span class="sd">    * Initializes the Tensorflow model.</span>
+<span class="sd">    * If there is a pretrained word vector(GloVe), it is loaded and assigned to the word vector of the model.</span>
+<span class="sd">    * Defines some operations to be displayed on the Tensorboard summary.</span>
+<span class="sd">    * Store the model and vocaburary for each tf.FLAGS.checkpoint_every step.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">DataHelper</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">utils</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">model</span> <span class="k">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">tensorflow.contrib</span> <span class="k">import</span> <span class="n">learn</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># Specify GPU number</span>
+<span class="sd">os.environ[&quot;CUDA_DEVICE_ORDER&quot;] = &quot;PCI_BUS_ID&quot;  # see issue #152</span>
+<span class="sd">os.environ[&quot;CUDA_VISIBLE_DEVICES&quot;] = &quot;6,7&quot;</span>
+
+<span class="sd"># Data loading params</span>
+<span class="sd">tf.flags.DEFINE_string(&quot;train_data_file&quot;, &quot;./csvs/train.csv&quot;, &quot;Data source for the train data.&quot;)</span>
+<span class="sd">tf.flags.DEFINE_string(&quot;dev_data_file&quot;, &quot;./csvs/dev.csv&quot;, &quot;Data source for the dev data.&quot;)</span>
+<span class="sd">tf.flags.DEFINE_string(&quot;act_data_file&quot;, &quot;./csvs/act.csv&quot;, &quot;Data source for the act data.&quot;)</span>
+
+<span class="sd"># Model Hyperparameters</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;embed_size&quot;, 300, &quot;Dimensionality of character embedding (default: 300)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;filter_size&quot;, 3, &quot;Filter sizes (default: 3)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;num_filters&quot;, 500, &quot;Number of filters per filter size (default: 500)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_float(&quot;dropout_keep_prob&quot;, 0.5, &quot;Dropout keep probability (default: 0.5)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;history_size1&quot;,2,&quot;History size of first FNN layer (default: 2)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;history_size2&quot;,1,&quot;History size of second FNN layer (default: 1)&quot;)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Misc Parameters</span>
+<span class="sd">    * allow_soft_placement : TensorFlow automatically choose an existing and supported device to run the operations in case the specified one doesn&#39;t exist, </span>
+<span class="sd">    * log_device_placement : Finds the device to which the operation or tensor is assigned</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd"># Misc Parameters</span>
+<span class="sd">tf.flags.DEFINE_boolean(&quot;allow_soft_placement&quot;, True, &quot;Allow device soft device placement&quot;)</span>
+<span class="sd">tf.flags.DEFINE_boolean(&quot;log_device_placement&quot;, False, &quot;Log placement of ops on devices&quot;)</span>
+
+<span class="sd"># Training parameters</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;num_epochs&quot;, 150, &quot;Number of training epochs (default: 150)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;evaluate_every&quot;, 23355, &quot;Evaluate model on dev set after this many steps (default: 23355, this step number is 1 epoch)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;checkpoint_every&quot;, 233550, &quot;Save model after this many steps (default: 233550, this step number is 10 epoch)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;num_checkpoints&quot;, 5, &quot;Number of checkpoints to store (default: 5)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;num_classes&quot;,23,&quot;Number of output act classes (default:23)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_integer(&quot;vocab_size&quot;,400000,&quot;Vocabulary size (default:400000)&quot;)</span>
+<span class="sd">tf.flags.DEFINE_string(&quot;glove&quot;,&quot;./glove/glove.txt&quot;,&quot;Using pretrained word embedding GloVe (default:True)&quot;)</span>
+
+
+<span class="sd">FLAGS = tf.flags.FLAGS</span>
+<span class="sd">FLAGS._parse_flags()</span>
+
+<span class="sd"># parameter print</span>
+<span class="sd">print(&quot;\nParameters:&quot;)</span>
+<span class="sd">for attr, value in sorted(FLAGS.__flags.items()):</span>
+<span class="sd">    print(&quot;{}={}&quot;.format(attr.upper(), value))</span>
+<span class="sd">print(&quot;&quot;)</span>
+
+
+
+<span class="sd"># Data Preparation</span>
+<span class="sd"># ==================================================</span>
+
+<span class="sd"># Load data</span>
+<span class="sd">print(&quot;Loading data...&quot;)</span>
+<span class="sd">whole_train_data = load_data(FLAGS.train_data_file)</span>
+<span class="sd">whole_dev_data = load_data(FLAGS.dev_data_file)</span>
+
+<span class="sd"># To remove NAN value in data</span>
+<span class="sd">whole_train_data[&#39;sentence&#39;].fillna(&quot;&quot;, inplace = True)</span>
+<span class="sd">whole_dev_data[&#39;sentence&#39;].fillna(&quot;&quot;, inplace = True)</span>
+
+<span class="sd"># Build vocabulary and preprocess sentences</span>
+<span class="sd">max_sentence_length = max(</span>
+<span class="sd">    max([len(x.split(&quot; &quot;)) for x in whole_train_data[&#39;sentence&#39;]]),</span>
+<span class="sd">    max([len(y.split(&quot; &quot;)) for y in whole_dev_data[&#39;sentence&#39;]])</span>
+<span class="sd">)</span>
+
+<span class="sd"># Preprocessing input sentences</span>
+<span class="sd">vocab_processor = learn.preprocessing.VocabularyProcessor(max_sentence_length)</span>
+<span class="sd">x_train_sen = list(vocab_processor.fit_transform(whole_train_data[&#39;sentence&#39;]))</span>
+<span class="sd">x_dev_sen = list(vocab_processor.fit_transform(whole_dev_data[&#39;sentence&#39;]))</span>
+
+<span class="sd">whole_train_data[&#39;sentence&#39;] = x_train_sen</span>
+<span class="sd">whole_dev_data[&#39;sentence&#39;] = x_dev_sen</span>
+
+<span class="sd"># Convert acts to one-hot vector</span>
+<span class="sd">whole_train_data[&#39;act&#39;] = convert_act_to_vector(whole_train_data[&#39;act&#39;],FLAGS.act_data_file)</span>
+<span class="sd">whole_dev_data[&#39;act&#39;] = convert_act_to_vector(whole_dev_data[&#39;act&#39;],FLAGS.act_data_file)</span>
+
+<span class="sd">print(&quot;max_sentence_length: {:d}&quot;.format(max_sentence_length))</span>
+<span class="sd">print(&quot;Vocabulary size : {:d}&quot;.format(len(vocab_processor.vocabulary_)))</span>
+
+<span class="sd"># Training</span>
+<span class="sd"># ==================================================</span>
+
+<span class="sd">with tf.Graph().as_default():</span>
+<span class="sd">    session_conf = tf.ConfigProto(</span>
+<span class="sd">      allow_soft_placement=FLAGS.allow_soft_placement,</span>
+<span class="sd">      log_device_placement=FLAGS.log_device_placement)</span>
+<span class="sd">    sess = tf.Session(config=session_conf)</span>
+<span class="sd">    </span>
+<span class="sd">    with sess.as_default():</span>
+<span class="sd">        model = Model(</span>
+<span class="sd">            max_sentence_len=max_sentence_length,</span>
+<span class="sd">            num_classes=FLAGS.num_classes,</span>
+<span class="sd">            vocab_size=len(vocab_processor.vocabulary_),</span>
+<span class="sd">            embed_size=FLAGS.embed_size,</span>
+<span class="sd">            filter_size=FLAGS.filter_size,</span>
+<span class="sd">            num_filters=FLAGS.num_filters,</span>
+<span class="sd">            history_size1=FLAGS.history_size1,</span>
+<span class="sd">            history_size2=FLAGS.history_size2</span>
+<span class="sd">        )</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        #define Training procedure</span>
+<span class="sd">        global_step = tf.Variable(0, name=&quot;global_step&quot;,trainable=False)</span>
+<span class="sd">        optimizer = tf.train.AdamOptimizer(learning_rate=0.001, name=&#39;Adam&#39;)</span>
+<span class="sd">        grads_and_vars = optimizer.compute_gradients(model.loss)</span>
+<span class="sd">        train_op = optimizer.apply_gradients(grads_and_vars,global_step=global_step)</span>
+<span class="sd">        </span>
+<span class="sd">        #define training accuracy measurements (accumulation value) </span>
+<span class="sd">        train_recall, train_recall_op =tf.metrics.recall(labels = model.input_y,</span>
+<span class="sd">                                              predictions = model.prediction,</span>
+<span class="sd">                                              name = &quot;recall&quot;)</span>
+<span class="sd">        train_precision, train_precision_op = tf.metrics.precision(labels = model.input_y,</span>
+<span class="sd">                                                     predictions = model.prediction,</span>
+<span class="sd">                                                     name = &#39;precision&#39;)</span>
+<span class="sd">        train_f_score = tf.scalar_mul(2.0,tf.div(tf.multiply(train_precision,train_recall),</span>
+<span class="sd">                                                    tf.add(train_precision,train_recall)))</span>
+<span class="sd">        </span>
+<span class="sd">        #define validation accuracy measurements (accumulation value)</span>
+<span class="sd">        dev_recall, dev_recall_op =tf.metrics.recall(labels = model.input_y,</span>
+<span class="sd">                                              predictions = model.prediction,</span>
+<span class="sd">                                              name = &quot;recall&quot;)</span>
+<span class="sd">        dev_precision, dev_precision_op = tf.metrics.precision(labels = model.input_y,</span>
+<span class="sd">                                                     predictions = model.prediction,</span>
+<span class="sd">                                                     name = &#39;precision&#39;)</span>
+<span class="sd">        dev_f_score = tf.scalar_mul(2.0,tf.div(tf.multiply(dev_precision,dev_recall),</span>
+<span class="sd">                                                    tf.add(dev_precision,dev_recall)))</span>
+<span class="sd">            </span>
+<span class="sd">            </span>
+<span class="sd">        #output directory for models and summries</span>
+<span class="sd">        timestamp = str(int(time.time()))</span>
+<span class="sd">        out_dir = os.path.abspath(os.path.join(os.path.curdir, &quot;runs&quot;, timestamp))</span>
+<span class="sd">        print(&quot;Writing to {}\n&quot;.format(out_dir))</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        #summries for loss and accuracy</span>
+<span class="sd">        loss_summary = tf.summary.scalar(&quot;loss&quot;, model.loss)</span>
+<span class="sd">        acc_summary = tf.summary.scalar(&quot;accuracy&quot;, model.accuracy)</span>
+<span class="sd">        </span>
+<span class="sd">        train_precision_summary = tf.summary.scalar(&quot;precision&quot;, train_precision)</span>
+<span class="sd">        train_recall_summary = tf.summary.scalar(&quot;recall&quot;, train_recall)</span>
+<span class="sd">        train_f_score_summary = tf.summary.scalar(&quot;f_score&quot;,train_f_score)</span>
+<span class="sd">        </span>
+<span class="sd">        dev_precision_summary = tf.summary.scalar(&quot;precision&quot;, dev_precision)</span>
+<span class="sd">        dev_recall_summary = tf.summary.scalar(&quot;recall&quot;, dev_recall)</span>
+<span class="sd">        dev_f_score_summary = tf.summary.scalar(&quot;f_score&quot;,dev_f_score)</span>
+<span class="sd">        </span>
+<span class="sd">        #Train summaries</span>
+<span class="sd">        train_summary_op = tf.summary.merge([loss_summary,acc_summary, train_precision_summary, train_recall_summary, train_f_score_summary])</span>
+<span class="sd">        train_summary_dir = os.path.join(out_dir, &quot;summaries&quot;, &quot;train&quot;)</span>
+<span class="sd">        train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)</span>
+
+<span class="sd">        #Dev summaries</span>
+<span class="sd">        dev_summary_op = tf.summary.merge([loss_summary, acc_summary,dev_precision_summary, dev_recall_summary, dev_f_score_summary,])</span>
+<span class="sd">        dev_summary_dir = os.path.join(out_dir, &quot;summaries&quot;,&quot;dev&quot;)</span>
+<span class="sd">        dev_summary_writer = tf.summary.FileWriter(dev_summary_dir, sess.graph)</span>
+
+<span class="sd">        #Checkpoint directory, </span>
+<span class="sd">        checkpoint_dir = os.path.abspath(os.path.join(out_dir,&quot;checkpoints&quot;))</span>
+<span class="sd">        checkpoint_prefix = os.path.join(checkpoint_dir, &quot;model&quot;)</span>
+<span class="sd">        if not os.path.exists(checkpoint_dir):</span>
+<span class="sd">            os.makedirs(checkpoint_dir)</span>
+<span class="sd">        saver = tf.train.Saver(tf.global_variables(), max_to_keep=FLAGS.num_checkpoints)</span>
+
+<span class="sd">        # Write vocabulary</span>
+<span class="sd">        vocab_processor.save(os.path.join(out_dir, &quot;vocab&quot;))</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        #initialize all variables</span>
+<span class="sd">        sess.run(tf.global_variables_initializer())</span>
+<span class="sd">        sess.run(tf.local_variables_initializer())</span>
+<span class="sd">        </span>
+<span class="sd">        </span>
+<span class="sd">        # load pre-trained word vector</span>
+<span class="sd">        if FLAGS.glove:</span>
+<span class="sd">            print(&quot;Load glove file {}&quot;.format(FLAGS.glove))</span>
+<span class="sd">            #initial matrix with random uniform	</span>
+<span class="sd">            initW = np.random.uniform(-0.25,0.25,(len(vocab_processor.vocabulary_),FLAGS.embed_size))</span>
+
+<span class="sd">            #load any vectors from the glove</span>
+<span class="sd">            f = open(FLAGS.glove,&quot;r&quot;)</span>
+<span class="sd">            vocab =[]</span>
+<span class="sd">            embed = []</span>
+<span class="sd">            for line in f.readlines():</span>
+<span class="sd">                row = line.strip().split(&#39; &#39;)</span>
+<span class="sd">                idx = vocab_processor.vocabulary_.get(row[0])</span>
+<span class="sd">                if idx != 0 :</span>
+<span class="sd">                    initW[idx] = row[1:]</span>
+<span class="sd">            f.close</span>
+<span class="sd">            print(&quot;glove file has been loaded!&quot;)</span>
+<span class="sd">            sess.run(model.W.assign(initW))</span>
+<span class="sd">&quot;&quot;&quot;</span>        
+<div class="viewcode-block" id="train_step"><a class="viewcode-back" href="../train.html#train.train_step">[docs]</a><span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="n">x_text</span><span class="p">,</span><span class="n">y_text</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A single training step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            feed_dict = {</span>
+<span class="sd">                model.input_x : x_text,</span>
+<span class="sd">                model.input_y: y_text,</span>
+<span class="sd">                model.dropout_keep_prob: FLAGS.dropout_keep_prob</span>
+<span class="sd">            }</span>
+
+<span class="sd">            _,step, summaries, loss, accuracy, precision, recall = sess.run(</span>
+<span class="sd">                [train_op, global_step, train_summary_op, model.loss, model.accuracy, train_precision_op, train_recall_op],</span>
+<span class="sd">                feed_dict)</span>
+
+<span class="sd">            if step % 1000 == 0:</span>
+<span class="sd">                time_str = datetime.datetime.now().isoformat()</span>
+<span class="sd">                print(&quot;train&gt; {}: step {}, loss {:g}, acc {:g}, pre {:g}, recall {:g}&quot;.format(time_str,step,loss,accuracy,precision,recall))</span>
+
+<span class="sd">            train_summary_writer.add_summary(summaries,step)</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+        
+<div class="viewcode-block" id="dev_step"><a class="viewcode-back" href="../train.html#train.dev_step">[docs]</a><span class="k">def</span> <span class="nf">dev_step</span><span class="p">(</span><span class="n">dev_step</span><span class="p">,</span> <span class="n">x_text</span><span class="p">,</span> <span class="n">y_text</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A single validation step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            feed_dict = {</span>
+<span class="sd">                model.input_x: x_text,</span>
+<span class="sd">                model.input_y: y_text,</span>
+<span class="sd">                model.dropout_keep_prob: 1.0</span>
+<span class="sd">            }</span>
+
+<span class="sd">            step, summaries, loss, accuracy, precision, recall = sess.run(</span>
+<span class="sd">                [global_step, dev_summary_op, model.loss, model.accuracy, dev_precision_op, dev_recall_op],</span>
+<span class="sd">                feed_dict)</span>
+<span class="sd">            </span>
+<span class="sd">            if dev_step % 1000 == 0:</span>
+<span class="sd">                time_str = datetime.datetime.now().isoformat()</span>
+<span class="sd">                print(&quot;dev&gt; {}: step {}, loss {:g}, acc {:g}, pre {:g}, recall {:g}&quot;.format(time_str, step, loss, accuracy, precision, recall))          </span>
+
+<span class="sd">            if writer: </span>
+<span class="sd">                writer.add_summary(summaries, step)</span>
+<span class="sd">        </span>
+<span class="sd">        train_dm = DataHelper(whole_train_data)</span>
+<span class="sd">        dev_dm = DataHelper(whole_dev_data)</span>
+<span class="sd">        </span>
+<span class="sd">        #zero padding for the first sentence that does not have history sentences</span>
+<span class="sd">        padding = pd.DataFrame(columns=[&#39;sentence&#39;],index=range(FLAGS.history_size1))</span>
+<span class="sd">        for i in range(FLAGS.history_size1+FLAGS.history_size2):</span>
+<span class="sd">            padding[&#39;sentence&#39;][i]=np.array([0]*max_sentence_length)</span>
+<span class="sd">        padding = padding[&#39;sentence&#39;]</span>
+<span class="sd">        </span>
+<span class="sd">        dev_step = 0</span>
+<span class="sd">        #generate batches</span>
+<span class="sd">        for epoch_i in range(FLAGS.num_epochs):</span>
+<span class="sd">            train_data = train_dm.get_contents(shuffle=True)</span>
+<span class="sd">            for x_batch, y_batch in train_data :        </span>
+<span class="sd">                x_batch = padding.append(x_batch,ignore_index=True)</span>
+<span class="sd">                </span>
+<span class="sd">                #train step</span>
+<span class="sd">                for i in range(len(x_batch)-FLAGS.history_size1-1):</span>
+<span class="sd">                   </span>
+<span class="sd">                    train_step(x_batch [i : i + FLAGS.history_size1 + FLAGS.history_size2 + 1].values.tolist(),</span>
+<span class="sd">                               np.reshape(y_batch[i],(1,FLAGS.num_classes)))</span>
+
+<span class="sd">                    current_step = tf.train.global_step(sess, global_step)</span>
+
+<span class="sd">                    if current_step % FLAGS.evaluate_every ==0:</span>
+<span class="sd">                        print(&quot;\nEvaluation:&quot;)</span>
+
+<span class="sd">                        dev_data = dev_dm.get_contents()</span>
+<span class="sd">                        for x_dev, y_dev in dev_data :</span>
+<span class="sd">                            x_dev = padding.append(x_dev,ignore_index=True)</span>
+
+<span class="sd">                            #dev_step</span>
+<span class="sd">                            for i in range(len(x_dev)-FLAGS.history_size1-1):</span>
+<span class="sd">                                dev_step += 1</span>
+<span class="sd">                                dev_step(dev_step, x_dev[i:i+FLAGS.history_size1+FLAGS.history_size2+1].values.tolist(),</span>
+<span class="sd">                                         np.reshape(y_dev[i],(1,FLAGS.num_classes)),</span>
+<span class="sd">                                        writer=dev_summary_writer)</span>
+<span class="sd">                                print(&quot; &quot;)</span>
+
+<span class="sd">                    if current_step %FLAGS.checkpoint_every ==0 :</span>
+<span class="sd">                        path = saver.save(sess, checkpoint_prefix, global_step = current_step)</span>
+<span class="sd">                        print(&quot;Saved model checkpoiont to {}\n&quot;.format(path))</span>
+<span class="sd">&quot;&quot;&quot;</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Act-Classification-with-CNN</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../data_generator.html">data_generator module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DataHelper.html">DataHelper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../model.html">model module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../train.html">train module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../eval.html">eval module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html">utils module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

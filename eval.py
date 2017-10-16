@@ -37,7 +37,7 @@ from utils import *
 import csv
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-"""
+
 # Parameters
 # ==================================================
 # Data Parameters
@@ -223,7 +223,7 @@ with open(os.path.join(FLAGS.checkpoint_dir, "..",'act_accuracy.csv'), 'w') as s
                                                                                                 recall,
                                                                                                 precision,
                                                                                                 f1score))
-        
+    
         writer.writerow({'act': original_acts[act_index][0],
                          'number of label':label[act_index],
                          'number of prediction':act_prediction,
@@ -246,4 +246,3 @@ with open(out_path, 'w') as f:
     csv.writer(f).writerows(predictions_human_readable)
     
 print("\nEvaluation finished!")
-"""

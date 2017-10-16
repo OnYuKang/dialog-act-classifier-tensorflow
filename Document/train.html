@@ -1,0 +1,135 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>train module &#8212; Act-Classification-with-CNN  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="eval module" href="eval.html" />
+    <link rel="prev" title="model module" href="model.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-train">
+<span id="train-module"></span><h1>train module<a class="headerlink" href="#module-train" title="Permalink to this headline">¶</a></h1>
+<p>Act_classification-with-CNN/train.py</p>
+<p>This file trains the Tensorflow model.</p>
+<p>In this file,</p>
+<ul class="simple">
+<li>Defines parameters for model initialization and training.</li>
+<li>Loads dataset for training/validation and preprocess the dataset.</li>
+<li>Initializes the Tensorflow model.</li>
+<li>If there is a pretrained word vector(GloVe), it is loaded and assigned to the word vector of the model.</li>
+<li>Defines some operations to be displayed on the Tensorboard summary.</li>
+<li>Store the model and vocaburary for each tf.FLAGS.checkpoint_every step.</li>
+</ul>
+<dl class="function">
+<dt id="train.dev_step">
+<code class="descclassname">train.</code><code class="descname">dev_step</code><span class="sig-paren">(</span><em>dev_step</em>, <em>x_text</em>, <em>y_text</em>, <em>writer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/train.html#dev_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#train.dev_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single validation step</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="train.train_step">
+<code class="descclassname">train.</code><code class="descname">train_step</code><span class="sig-paren">(</span><em>x_text</em>, <em>y_text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/train.html#train_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#train.train_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>A single training step</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Act-Classification-with-CNN</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data_generator.html">data_generator module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DataHelper.html">DataHelper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">train module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eval.html">eval module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="model.html" title="previous chapter">model module</a></li>
+      <li>Next: <a href="eval.html" title="next chapter">eval module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/train.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

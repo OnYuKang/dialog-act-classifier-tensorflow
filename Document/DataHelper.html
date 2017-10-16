@@ -1,0 +1,222 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DataHelper module &#8212; Act-Classification-with-CNN  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="model module" href="model.html" />
+    <link rel="prev" title="data_generator module" href="data_generator.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-DataHelper">
+<span id="datahelper-module"></span><h1>DataHelper module<a class="headerlink" href="#module-DataHelper" title="Permalink to this headline">¶</a></h1>
+<p>Act_classification-with-CNN/DataHelper.py</p>
+<p>This file manages the data to feed to model.</p>
+<p>To ease data management, this code uses the Pandas python package.
+Pandas is a Python package providing fast, flexible, and expressive data structures designed to make working with relational or labeled data both easy and intuitive.
+The two primary data structures of pandas, Series (1-dimensional) and DataFrame (2-dimensional), handle the vast majority of typical use cases in many areas of engineering.
+| In this DataHelper class, each data as pandas.DataFrame is given as a parameter.</p>
+<dl class="class">
+<dt id="DataHelper.DataHelper">
+<em class="property">class </em><code class="descclassname">DataHelper.</code><code class="descname">DataHelper</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataHelper.html#DataHelper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DataHelper.DataHelper" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class receives whole dataset in dataframe format and returns each call.
+Each call consists of sentences and corresponding dialog acts.
+When we train a model, sentences and dialog acts for each call are fed into model as input and desired output.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>df</strong> (<em>dataframe</em>) – Whole dataset in dataframe format</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="DataHelper.DataHelper.get_call_df">
+<code class="descname">get_call_df</code><span class="sig-paren">(</span><em>call_idx</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataHelper.html#DataHelper.get_call_df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DataHelper.DataHelper.get_call_df" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a dataframe of each call corresponding to each call index</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>call_idx</strong> (<em>int</em>) – A call index</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return pandas.dataframe:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Dataframe corresponding to call index</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataHelper.DataHelper.get_contents">
+<code class="descname">get_contents</code><span class="sig-paren">(</span><em>shuffle=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataHelper.html#DataHelper.get_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DataHelper.DataHelper.get_contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function manages the whole train or dev dataset and returns sentences and dialog acts for one call.</p>
+<p>Usually, when we train the model, we shuffle the order of the data.
+In this case, the shuffle flag is set to True, it returns data in mixed order
+But when we validate the model, we do not shuffle the order of the data.
+In this case, the shuffle flag is set to False, and it returns data in order</p>
+<p>if shuffle is True: Return shuffled data (for train data)
+elif shuffle is False: Return unshuffled data (for dev data)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>shuffle</strong> (<em>bool</em>) – Whether to shuffle the order of the calls</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Yields:</th><td class="field-body"><em>pandas.series</em> – Series of sentences in each call
+numpy.ndarray: An array of dialog acts in each call</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataHelper.DataHelper.get_num_calls">
+<code class="descname">get_num_calls</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataHelper.html#DataHelper.get_num_calls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DataHelper.DataHelper.get_num_calls" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function counts number of calls in each whole dataset</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return int:</th><td class="field-body">Total number of calls in whole data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataHelper.DataHelper.get_shuffled_call_idx">
+<code class="descname">get_shuffled_call_idx</code><span class="sig-paren">(</span><em>call_indexs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataHelper.html#DataHelper.get_shuffled_call_idx"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DataHelper.DataHelper.get_shuffled_call_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function shuffles whole call indexs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>call_indexs</strong> (<em>int</em>) – Whole call indexs in order</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return np.array:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Array of shuffled call indexs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="DataHelper.DataHelper.get_test_contents">
+<code class="descname">get_test_contents</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/DataHelper.html#DataHelper.get_test_contents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#DataHelper.DataHelper.get_test_contents" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function manages the whole test dataset and returns sentences for one call.</p>
+<p>When we test the model, we just feed input sentence.
+After we get the predictions then we compare it to desired output.
+Therefore in this function, it just returns sentences of each call</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Yields:</th><td class="field-body"><em>pandas.series</em> – Series of sentences in each call</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Act-Classification-with-CNN</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data_generator.html">data_generator module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DataHelper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="train.html">train module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eval.html">eval module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html">utils module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="data_generator.html" title="previous chapter">data_generator module</a></li>
+      <li>Next: <a href="model.html" title="next chapter">model module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/DataHelper.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

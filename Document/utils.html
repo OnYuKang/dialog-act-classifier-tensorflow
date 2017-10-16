@@ -1,0 +1,232 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>utils module &#8212; Act-Classification-with-CNN  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="eval module" href="eval.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-utils">
+<span id="utils-module"></span><h1>utils module<a class="headerlink" href="#module-utils" title="Permalink to this headline">¶</a></h1>
+<p>Act_classification-with-CNN/utils.py</p>
+<p>This file contains some useful functions for other files.</p>
+<dl class="function">
+<dt id="utils.convert_act_to_vector">
+<code class="descclassname">utils.</code><code class="descname">convert_act_to_vector</code><span class="sig-paren">(</span><em>df</em>, <em>act_data_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#convert_act_to_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.convert_act_to_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function converts pandas act dataframe to one-hot vector in train.py and eval.py</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pandas.dataframe</strong> – Act dataframe</li>
+<li><strong>act_data_file</strong> (<em>str</em>) – Act csv file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return list labels:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Converted one-hot vectors from act as string type</p>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;./csvs/train.csv&#39;</span><span class="p">)</span>
+ <span class="n">data</span><span class="p">[</span><span class="s1">&#39;act&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_act_to_vector</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;act&#39;</span><span class="p">],</span><span class="s1">&#39;./csvs/act.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="figure align-center" id="id1">
+<a class="reference internal image-reference" href="convert_act_to_vector_example.jpg"><img alt="convert_act_to_vector_example.jpg" src="convert_act_to_vector_example.jpg" /></a>
+<p class="caption"><span class="caption-text">This example is some acts label to one hot vector label.</span></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.convert_vector_to_act">
+<code class="descclassname">utils.</code><code class="descname">convert_vector_to_act</code><span class="sig-paren">(</span><em>act_array</em>, <em>act_data_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#convert_vector_to_act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.convert_vector_to_act" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function convert one-hot vector to act as string type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>numpy.array</strong> – one-hot vectors as numpy array type</li>
+<li><strong>act_data_file</strong> (<em>str</em>) – Act csv file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Returns list whole_act_list:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">converted acts list as string type from one-hot vectors</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.get_abs_path">
+<code class="descclassname">utils.</code><code class="descname">get_abs_path</code><span class="sig-paren">(</span><em>file_dir</em>, <em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#get_abs_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.get_abs_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the absolute path of the file name</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>file_dir</strong> (<em>str</em>) – Directory containing files</li>
+<li><strong>file_name</strong> (<em>str</em>) – The name of the file.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return str abs_path:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">The absolute path of the file</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.load_data">
+<code class="descclassname">utils.</code><code class="descname">load_data</code><span class="sig-paren">(</span><em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#load_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.load_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function loads csv file as pandas.dataframe in train.py and eval.py.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>file_name</strong> (<em>str</em>) – File name to load</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return dataframe df:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Whole dataset as dataframe type</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">(</span><span class="s1">&#39;./csvs/train.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="load_data_example.jpg"><img alt="load_data_example.jpg" src="load_data_example.jpg" /></a>
+<p class="caption"><span class="caption-text">This example is train.csv file loaded into pandas.DataFrame.</span></p>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="utils.preprocess">
+<code class="descclassname">utils.</code><code class="descname">preprocess</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/utils.html#preprocess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#utils.preprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>When creating a csv file from json files in a data_generator.py file, this function is used to preprocess the string.</p>
+<div class="line-block">
+<div class="line">It makes all the words in the sentence lower case and replace sentence symbols to space.</div>
+</div>
+<p>Then it replaces miss spelled words into correct words due to speech recognition errors and erases the proper nouns that are not found in word embedding among the words appearing in the dialogue. After that, it returns a copy of the string in which all chars have been stripped from the beginning and the end of the string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>string</strong> (<em>str</em>) – Raw string</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return str string:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">Preprocessed string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">Act-Classification-with-CNN</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data_generator.html">data_generator module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DataHelper.html">DataHelper module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model.html">model module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="train.html">train module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="eval.html">eval module</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">utils module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="eval.html" title="previous chapter">eval module</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Author.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/utils.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

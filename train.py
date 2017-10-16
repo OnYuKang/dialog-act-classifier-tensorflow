@@ -22,7 +22,7 @@ import datetime
 from model import Model
 from tensorflow.contrib import learn
 import csv
-"""
+
 # Specify GPU number
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
 os.environ["CUDA_VISIBLE_DEVICES"] = "6,7"
@@ -39,7 +39,7 @@ tf.flags.DEFINE_integer("num_filters", 500, "Number of filters per filter size (
 tf.flags.DEFINE_float("dropout_keep_prob", 0.5, "Dropout keep probability (default: 0.5)")
 tf.flags.DEFINE_integer("history_size1",2,"History size of first FNN layer (default: 2)")
 tf.flags.DEFINE_integer("history_size2",1,"History size of second FNN layer (default: 1)")
-"""
+
 
 """
     Misc Parameters
@@ -47,7 +47,7 @@ tf.flags.DEFINE_integer("history_size2",1,"History size of second FNN layer (def
     * log_device_placement : Finds the device to which the operation or tensor is assigned
 
 """
-"""
+
 # Misc Parameters
 tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device placement")
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
@@ -68,7 +68,7 @@ FLAGS._parse_flags()
 # parameter print
 print("\nParameters:")
 for attr, value in sorted(FLAGS.__flags.items()):
-    print("{}={}".format(attr.upper(), value))
+    print("{} = {}".format(attr.upper(), value))
 print("")
 
 
@@ -201,7 +201,8 @@ with tf.Graph().as_default():
         
         # load pre-trained word vector
         if FLAGS.glove:
-            print("Load glove file {}".format(FLAGS.glove))
+            print("Loading GloVe file... {}".format(FLAGS.glove))
+            
             #initial matrix with random uniform	
             initW = np.random.uniform(-0.25,0.25,(len(vocab_processor.vocabulary_),FLAGS.embed_size))
 
@@ -215,15 +216,16 @@ with tf.Graph().as_default():
                 if idx != 0 :
                     initW[idx] = row[1:]
             f.close
-            print("glove file has been loaded!")
+            
+            print("GloVe file has been loaded!\n")
             sess.run(model.W.assign(initW))
-"""        
-def train_step(x_text,y_text):
-    """
-    A single training step
-    """
-    pass
-    """
+                   
+        def train_step(x_text,y_text):
+            """
+            A single training step
+
+            """
+    
             feed_dict = {
                 model.input_x : x_text,
                 model.input_y: y_text,
@@ -236,44 +238,44 @@ def train_step(x_text,y_text):
 
             if step % 1000 == 0:
                 time_str = datetime.datetime.now().isoformat()
-                print("train> {}: step {}, loss {:g}, acc {:g}, pre {:g}, recall {:g}".format(time_str,step,loss,accuracy,precision,recall))
+                print("train> {}: step {}, loss {:g}, acc {:g}, pre {:g}, recall {:g}".format(time_str, step, loss, accuracy, precision, recall))
 
-            train_summary_writer.add_summary(summaries,step)
-    """
+            train_summary_writer.add_summary(summaries, step)
+
         
-def dev_step(dev_step, x_text, y_text, writer=None):
-    """
-    A single validation step
-    """
-    pass
-    """
+        def dev_step(validation_step, x_text, y_text, writer=None):
+            """
+            A single validation step
+
+            """
+
             feed_dict = {
                 model.input_x: x_text,
                 model.input_y: y_text,
                 model.dropout_keep_prob: 1.0
             }
 
-            step, summaries, loss, accuracy, precision, recall = sess.run(
-                [global_step, dev_summary_op, model.loss, model.accuracy, dev_precision_op, dev_recall_op],
+            summaries, loss, accuracy, precision, recall = sess.run(
+                [dev_summary_op, model.loss, model.accuracy, dev_precision_op, dev_recall_op],
                 feed_dict)
-            
-            if dev_step % 1000 == 0:
+
+            if validation_step % 1000 == 0:
                 time_str = datetime.datetime.now().isoformat()
-                print("dev> {}: step {}, loss {:g}, acc {:g}, pre {:g}, recall {:g}".format(time_str, step, loss, accuracy, precision, recall))          
+                print("dev> {}: step {}, loss {:g}, acc {:g}, pre {:g}, recall {:g}".format(time_str, validation_step, loss, accuracy, precision, recall))          
 
             if writer: 
-                writer.add_summary(summaries, step)
-        
+                writer.add_summary(summaries, validation_step)
+
         train_dm = DataHelper(whole_train_data)
         dev_dm = DataHelper(whole_dev_data)
         
         #zero padding for the first sentence that does not have history sentences
         padding = pd.DataFrame(columns=['sentence'],index=range(FLAGS.history_size1))
-        for i in range(FLAGS.history_size1+FLAGS.history_size2):
+        for i in range(FLAGS.history_size1 + FLAGS.history_size2):
             padding['sentence'][i]=np.array([0]*max_sentence_length)
         padding = padding['sentence']
         
-        dev_step = 0
+        validation_step = 0
         #generate batches
         for epoch_i in range(FLAGS.num_epochs):
             train_data = train_dm.get_contents(shuffle=True)
@@ -289,7 +291,7 @@ def dev_step(dev_step, x_text, y_text, writer=None):
                     current_step = tf.train.global_step(sess, global_step)
 
                     if current_step % FLAGS.evaluate_every ==0:
-                        print("\nEvaluation:")
+                        print("\nValidation:")
 
                         dev_data = dev_dm.get_contents()
                         for x_dev, y_dev in dev_data :
@@ -297,14 +299,14 @@ def dev_step(dev_step, x_text, y_text, writer=None):
 
                             #dev_step
                             for i in range(len(x_dev)-FLAGS.history_size1-1):
-                                dev_step += 1
-                                dev_step(dev_step, x_dev[i:i+FLAGS.history_size1+FLAGS.history_size2+1].values.tolist(),
+                                validation_step += 1
+                                dev_step(validation_step, x_dev[i : i + FLAGS.history_size1 + FLAGS.history_size2 + 1].values.tolist(),
                                          np.reshape(y_dev[i],(1,FLAGS.num_classes)),
                                         writer=dev_summary_writer)
-                                print(" ")
+                        print(" ")
 
                     if current_step %FLAGS.checkpoint_every ==0 :
                         path = saver.save(sess, checkpoint_prefix, global_step = current_step)
                         print("Saved model checkpoiont to {}\n".format(path))
-"""
+
 
