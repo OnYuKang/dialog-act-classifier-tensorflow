@@ -36,7 +36,7 @@ from DataHelper import *
 from utils import *
 import csv
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  # see issue #152
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
 # Parameters
 # ==================================================
@@ -46,7 +46,7 @@ tf.flags.DEFINE_string("act_data_file", "./csvs/act.csv", "Data source for the a
 
 # Eval Parameters
 
-tf.flags.DEFINE_string("checkpoint_dir", "./runs/1503201470/checkpoints", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "./runs/1508157599/checkpoints", "Checkpoint directory from training run")
 
 tf.flags.DEFINE_integer("history_size1",2,"History size of first FNN layer (default: 2)")
 tf.flags.DEFINE_integer("history_size2",1,"History size of second FNN layer (default: 1)")
