@@ -47,7 +47,7 @@ class Model(object):
         self, max_sentence_len, num_classes, vocab_size, embed_size,
         filter_size, num_filters, history_size1, history_size2):
         
-        #placeholders for input, output and dropout
+        # Placeholders for input, output and dropout
         self.input_x = tf.placeholder(tf.int32, [history_size1 + history_size2 + 1, max_sentence_len], name="input_x")
         self.input_y = tf.placeholder(tf.float32, [1, num_classes], name="input_y")
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob") 
@@ -59,7 +59,7 @@ class Model(object):
             self.W = tf.Variable( tf.random_uniform([vocab_size, embed_size], -1.0, 1.0),name="W")
             self.embedded_chars = tf.nn.embedding_lookup(self.W, self.input_x)
          
-            #make it a 4D tensor
+            # Make it a 4D tensor
             self.embedded_chars_expanded = tf.expand_dims(self.embedded_chars, -1)
             
         # Convolution layer
@@ -141,10 +141,10 @@ class Model(object):
             
             # sum of wx and b1
             output = np.zeros(num_classes,dtype=np.float32)
-            for i in range (history_size2,0,-1):
+            for i in range (history_size2,-1,-1):
                          temp = tf.matmul(FNN1_list[i - history_size2], w[i])
                          output = tf.add(output,temp)
-           
+            
             FNN2_output = tf.nn.bias_add(output,b2)
             
         with tf.name_scope("output"):
@@ -155,7 +155,7 @@ class Model(object):
             # This is like sigmoid_cross_entropy_with_logits() except that pos_weight for the positive targets
             losses = tf.nn.weighted_cross_entropy_with_logits(logits = FNN2_output,
                                                               targets = self.input_y,
-                                                              pos_weight = 2,
+                                                              pos_weight = 4,
                                                               name = 'cross_entropy')
             self.loss=tf.reduce_mean(losses, name='cross_entropy_mean')
                       

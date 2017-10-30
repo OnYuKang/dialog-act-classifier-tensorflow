@@ -46,7 +46,7 @@ tf.flags.DEFINE_string("act_data_file", "./csvs/act.csv", "Data source for the a
 
 # Eval Parameters
 
-tf.flags.DEFINE_string("checkpoint_dir", "./runs/1508157599/checkpoints", "Checkpoint directory from training run")
+tf.flags.DEFINE_string("checkpoint_dir", "./runs/1509324515/checkpoints", "Checkpoint directory from training run")
 
 tf.flags.DEFINE_integer("history_size1",2,"History size of first FNN layer (default: 2)")
 tf.flags.DEFINE_integer("history_size2",1,"History size of second FNN layer (default: 1)")
@@ -195,6 +195,7 @@ with open(os.path.join(FLAGS.checkpoint_dir, "..",'act_accuracy.csv'), 'w') as s
             if correct_prediction == 0 :
                 print("{} : This act never matched the correct answer.".format(original_acts[act_index]))
                 remark.append(["This act never matched the correct answer"])
+                precision = 0
             recall = 0   
                     
                     
@@ -206,7 +207,7 @@ with open(os.path.join(FLAGS.checkpoint_dir, "..",'act_accuracy.csv'), 'w') as s
             print("{} : This act is never detect by system".format(original_acts[act_index]))
             remark.append(["This act is never detect by system"])
             precision = 0
-  
+		
             
         # f1 score    
         if recall != 0 and precision != 0:

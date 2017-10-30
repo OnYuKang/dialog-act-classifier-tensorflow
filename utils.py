@@ -73,6 +73,7 @@ def preprocess(string):
     string = string.strip().lower()
     string = re.sub(r"\'", " ", string)
     string = re.sub(r"[^a-z?]", " ", string)
+    string = re.sub(r"\?"," ?",string)
     string = re.sub(r"\s+", " ", string)
 
     for fr, to in exception_words.items():

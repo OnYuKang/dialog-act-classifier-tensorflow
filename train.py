@@ -53,7 +53,7 @@ tf.flags.DEFINE_boolean("allow_soft_placement", True, "Allow device soft device 
 tf.flags.DEFINE_boolean("log_device_placement", False, "Log placement of ops on devices")
 
 # Training parameters
-tf.flags.DEFINE_integer("num_epochs", 150, "Number of training epochs (default: 150)")
+tf.flags.DEFINE_integer("num_epochs", 170, "Number of training epochs (default: 150)")
 tf.flags.DEFINE_integer("evaluate_every", 233550, "Evaluate model on dev set after this many steps (default: 233550, this step number is 10 epoch)")
 tf.flags.DEFINE_integer("checkpoint_every", 233550, "Save model after this many steps (default: 233550, this step number is 10 epoch)")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
@@ -130,7 +130,7 @@ with tf.Graph().as_default():
         
         #define Training procedure
         global_step = tf.Variable(0, name="global_step",trainable=False)
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.001, name='Adam')
+        optimizer = tf.train.AdamOptimizer(learning_rate=0.0001, name='Adam')
         grads_and_vars = optimizer.compute_gradients(model.loss)
         train_op = optimizer.apply_gradients(grads_and_vars,global_step=global_step)
         
